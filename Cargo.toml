@@ -204,7 +204,7 @@ non_kebab_case_features = "deny"
 [workspace]
 package.edition = "2024"
 package.authors = ["The Servo Project Developers"]
-package.license = "MIT OR Apache-2.0"
+package.license = "MIT"
 package.repository = "https://github.com/smallvec/smallvec"
 package.homepage = "https://smallvec.rs"
 package.rust-version = "1.100"
