@@ -2,6 +2,12 @@
 use super::specialization::SpecFromSlice;
 #[cfg(feature = "arrayvec")]
 use arrayvec::ArrayVec;
+#[cfg(feature = "tinyvec")]
+use tinyvec::{
+    Array,
+    ArrayVec as TinyArrayVec,
+    TinyVec
+};
 use {
     super::{
         SmallVec,
@@ -144,6 +150,64 @@ impl<Item, const INLINE: usize, const LENGTH: usize, Heap: Allocator>
             smallvec.set_len(0);
             array.set_len(length);
         }
+        Ok(array)
+    }
+}
+
+#[cfg(feature = "tinyvec")]
+impl<A: Array, const INLINE: usize> From<TinyVec<A>> for SmallVec<A::Item, INLINE, Global> {
+    fn from(tiny: TinyVec<A>) -> Self {
+        if tiny.is_heap() && tiny.len() > Self::inline_size() {
+            // The source already owns a heap buffer big enough for a spilled
+            // `SmallVec`, so it can be adopted without copying. A heap buffer
+            // that still fits inline is repacked into the stack buffer below.
+            tiny.into_vec().into()
+        } else {
+            let mut smallvec = Self::with_capacity(tiny.len());
+            smallvec.extend(tiny);
+            smallvec
+        }
+    }
+}
+#[cfg(feature = "tinyvec")]
+impl<A: Array, const INLINE: usize, Heap: Allocator> TryFrom<SmallVec<A::Item, INLINE, Heap>>
+    for TinyVec<A>
+{
+    type Error = SmallVec<A::Item, INLINE, Heap>;
+
+    fn try_from(
+        smallvec: SmallVec<A::Item, INLINE, Heap>
+    ) -> Result<TinyVec<A>, SmallVec<A::Item, INLINE, Heap>> {
+        if smallvec.len() > A::CAPACITY {
+            return Err(smallvec);
+        }
+        let mut tiny = TinyVec::new();
+        tiny.extend(smallvec);
+        Ok(tiny)
+    }
+}
+#[cfg(feature = "tinyvec")]
+impl<A: Array, const INLINE: usize> From<TinyArrayVec<A>> for SmallVec<A::Item, INLINE, Global> {
+    fn from(array: TinyArrayVec<A>) -> Self {
+        let mut smallvec = Self::with_capacity(array.len());
+        smallvec.extend(array);
+        smallvec
+    }
+}
+#[cfg(feature = "tinyvec")]
+impl<A: Array, const INLINE: usize, Heap: Allocator> TryFrom<SmallVec<A::Item, INLINE, Heap>>
+    for TinyArrayVec<A>
+{
+    type Error = SmallVec<A::Item, INLINE, Heap>;
+
+    fn try_from(
+        smallvec: SmallVec<A::Item, INLINE, Heap>
+    ) -> Result<TinyArrayVec<A>, SmallVec<A::Item, INLINE, Heap>> {
+        if smallvec.len() > A::CAPACITY {
+            return Err(smallvec);
+        }
+        let mut array = TinyArrayVec::new();
+        array.extend(smallvec);
         Ok(array)
     }
 }

@@ -7,6 +7,11 @@ use equivalent::{
 };
 #[cfg(feature = "rkyv")]
 use rkyv::vec::ArchivedVec;
+#[cfg(feature = "tinyvec")]
+use tinyvec::{
+    ArrayVec as TinyArrayVec,
+    TinyVec
+};
 use {
     super::SmallVec,
     alloc::{
@@ -228,6 +233,40 @@ implementation!([const LENGTH: usize] for ArrayVec<Item, LENGTH> =<> SmallVec<Ot
 implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =<>+ ArrayVec<Other, LENGTH>);
 #[cfg(all(feature = "arrayvec", feature = "equivalent"))]
 implementation!([const LENGTH: usize] for ArrayVec<Item, LENGTH> =<>+ SmallVec<Other, INLINE, Heap>);
+
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =? TinyVec<[Other; LENGTH]> where Other: Default);
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for TinyVec<[Item; LENGTH]> =? SmallVec<Other, INLINE, Heap> where Item: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =?+ TinyVec<[Other; LENGTH]> where Other: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for TinyVec<[Item; LENGTH]> =?+ SmallVec<Other, INLINE, Heap> where Item: Default);
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =<> TinyVec<[Other; LENGTH]> where Other: Default);
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for TinyVec<[Item; LENGTH]> =<> SmallVec<Other, INLINE, Heap> where Item: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =<>+ TinyVec<[Other; LENGTH]> where Other: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for TinyVec<[Item; LENGTH]> =<>+ SmallVec<Other, INLINE, Heap> where Item: Default);
+
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =? TinyArrayVec<[Other; LENGTH]> where Other: Default);
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for TinyArrayVec<[Item; LENGTH]> =? SmallVec<Other, INLINE, Heap> where Item: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =?+ TinyArrayVec<[Other; LENGTH]> where Other: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for TinyArrayVec<[Item; LENGTH]> =?+ SmallVec<Other, INLINE, Heap> where Item: Default);
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =<> TinyArrayVec<[Other; LENGTH]> where Other: Default);
+#[cfg(feature = "tinyvec")]
+implementation!([const LENGTH: usize] for TinyArrayVec<[Item; LENGTH]> =<> SmallVec<Other, INLINE, Heap> where Item: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for SmallVec<Item, INLINE, Heap> =<>+ TinyArrayVec<[Other; LENGTH]> where Other: Default);
+#[cfg(all(feature = "tinyvec", feature = "equivalent"))]
+implementation!([const LENGTH: usize] for TinyArrayVec<[Item; LENGTH]> =<>+ SmallVec<Other, INLINE, Heap> where Item: Default);
 
 implementation!([] for SmallVec<Item, INLINE, Heap> =? Cow<'_, [Other]> where Other: Clone);
 implementation!([] for Cow<'_, [Item]> =? SmallVec<Other, INLINE, Heap> where Item: Clone);
