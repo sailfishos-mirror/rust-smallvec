@@ -9,6 +9,7 @@ jobs:
     if: github.repository == 'smallvec/smallvec'
     steps:
       - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@nightly
       - uses: rust-lang/crates-io-auth-action@v1
         id: auth
       - run: cargo publish
